@@ -1,69 +1,62 @@
-// src/services/tmdbApi.js
-import { MOCK_MOVIES, MOCK_GENRES } from './mockTmdbData';
+const BASE_URL = 'https://api.themoviedb.org/3';
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
-// Helper to simulate network delay
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const fetchFromApi = async (endpoint, params = {}) => {
+  const queryParams = new URLSearchParams({
+    api_key: API_KEY,
+    ...params,
+  });
+  
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`TMDB API error: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("API Fetch Error:", error);
+    throw error;
+  }
+};
 
 export const tmdbApi = {
   getMovieDetails: async (id) => {
-    await delay(300);
-    const movie = MOCK_MOVIES.find((m) => m.id === Number(id));
-    // If it was created from pagination logic, try modulo
-    if (!movie) {
-      const originalId = Number(id) % 1000;
-      return MOCK_MOVIES.find((m) => m.id === originalId) || MOCK_MOVIES[0];
+    const data = await fetchFromApi(`/movie/${id}`, { append_to_response: 'videos,credits,similar,reviews' });
+    
+    // Extract trailer URL to maintain compatibility with existing components
+    let trailer_url = null;
+    if (data.videos && data.videos.results) {
+      const trailer = data.videos.results.find(vid => vid.type === 'Trailer' && vid.site === 'YouTube');
+      if (trailer) {
+        trailer_url = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+      }
     }
-    return movie;
+    
+    return { ...data, trailer_url };
   },
 
   getTrendingMovies: async () => {
-    await delay(600);
-    return { results: [...MOCK_MOVIES].sort(() => 0.5 - Math.random()) };
+    return fetchFromApi('/trending/movie/week');
   },
 
   getPopularMovies: async () => {
-    await delay(600);
-    return { results: [...MOCK_MOVIES].sort((a, b) => b.popularity - a.popularity) };
+    return fetchFromApi('/movie/popular');
   },
 
   getTopRatedMovies: async () => {
-    await delay(600);
-    return { results: [...MOCK_MOVIES].sort((a, b) => b.vote_average - a.vote_average) };
+    return fetchFromApi('/movie/top_rated');
   },
 
   searchMovies: async (query) => {
-    await delay(400);
     if (!query) return { results: [] };
-    const lowerQuery = query.toLowerCase();
-    const results = MOCK_MOVIES.filter(
-      (movie) =>
-        movie.title.toLowerCase().includes(lowerQuery) ||
-        movie.overview.toLowerCase().includes(lowerQuery)
-    );
-    return { results };
+    return fetchFromApi('/search/movie', { query });
   },
 
   getGenres: async () => {
-    await delay(300);
-    return { genres: MOCK_GENRES };
+    return fetchFromApi('/genre/movie/list');
   },
 
   getMoviesByGenre: async (genreId, page = 1) => {
-    await delay(600);
-    let results = MOCK_MOVIES.filter((movie) => movie.genre_ids.includes(genreId));
-    
-    // Simulate more data on subsequent pages
-    if (page > 1) {
-      results = results.map(movie => ({
-        ...movie,
-        id: movie.id + (page * 1000) // Ensure unique keys for new items
-      })).sort(() => 0.5 - Math.random());
-    }
-    
-    return { 
-      results,
-      page,
-      total_pages: 5
-    };
+    return fetchFromApi('/discover/movie', { with_genres: genreId, page });
   },
 };

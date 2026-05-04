@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useMovieContext } from "../context/MovieContext";
 import { tmdbApi } from "../services/tmdbApi";
+import CastSlider from "../components/CastSlider";
+import MovieSlider from "../components/MovieSlider";
 
 function MoviePage() {
   const { id } = useParams();
@@ -177,6 +179,50 @@ function MoviePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ADDITIONAL SECTIONS */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 space-y-16">
+        {/* Cast Section */}
+        {movie.credits?.cast && movie.credits.cast.length > 0 && (
+          <div className="-mx-4 sm:mx-0">
+            <CastSlider cast={movie.credits.cast} />
+          </div>
+        )}
+
+        {/* Similar Movies Section */}
+        {movie.similar?.results && movie.similar.results.length > 0 && (
+          <div className="-mx-4 sm:mx-0 pb-12">
+            <MovieSlider title="Similar Movies" moviesList={movie.similar.results} />
+          </div>
+        )}
+
+        {/* Reviews Section */}
+        {movie.reviews?.results && movie.reviews.results.length > 0 && (
+          <div className="pb-20">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">User Reviews</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {movie.reviews.results.slice(0, 4).map((review) => (
+                <div key={review.id} className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      {review.author.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium">{review.author}</h4>
+                      <div className="flex items-center gap-1 text-yellow-500 text-xs">
+                        ★ {review.author_details?.rating || '-'}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-neutral-400 text-sm line-clamp-4 leading-relaxed">
+                    {review.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
