@@ -5,6 +5,17 @@ import { MOCK_MOVIES, MOCK_GENRES } from './mockTmdbData';
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const tmdbApi = {
+  getMovieDetails: async (id) => {
+    await delay(300);
+    const movie = MOCK_MOVIES.find((m) => m.id === Number(id));
+    // If it was created from pagination logic, try modulo
+    if (!movie) {
+      const originalId = Number(id) % 1000;
+      return MOCK_MOVIES.find((m) => m.id === originalId) || MOCK_MOVIES[0];
+    }
+    return movie;
+  },
+
   getTrendingMovies: async () => {
     await delay(600);
     return { results: [...MOCK_MOVIES].sort(() => 0.5 - Math.random()) };

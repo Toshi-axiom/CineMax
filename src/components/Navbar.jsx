@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { tmdbApi } from "../services/tmdbApi";
-import { useMovieContext } from "../context/MovieContext";
 
 function Navbar() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const { openModal } = useMovieContext();
   const searchRef = useRef(null);
+  const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Debounced search effect
   useEffect(() => {
@@ -54,7 +56,7 @@ function Navbar() {
   }, []);
 
   const handleResultClick = (movie) => {
-    openModal(movie);
+    navigate(`/movie/${movie.id}`);
     setShowResults(false);
     setQuery("");
   };
@@ -67,19 +69,17 @@ function Navbar() {
 
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center">
+            <Link to="/" className="flex items-center">
               <span className="text-purple-500 font-black text-3xl tracking-tighter">
                 Cine<span className="text-white font-medium tracking-normal">Max</span>
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-white hover:text-purple-400 transition-colors font-medium">Home</a>
-            <a href="#trending" className="text-neutral-300 hover:text-purple-400 transition-colors font-medium">Trending</a>
-            <a href="#popular" className="text-neutral-300 hover:text-purple-400 transition-colors font-medium">Popular</a>
-            <a href="#top-rated" className="text-neutral-300 hover:text-purple-400 transition-colors font-medium">Top Rated</a>
+            <Link to="/" className="text-white hover:text-purple-400 transition-colors font-medium">Home</Link>
+            <Link to="/watchlist" className="text-neutral-300 hover:text-purple-400 transition-colors font-medium">Watchlist</Link>
           </nav>
 
           {/* Search */}
@@ -168,15 +168,78 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile Button (Placeholder) */}
-          <button className="md:hidden text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+          {/* Mobile Button */}
+          <button 
+            className="md:hidden text-white relative z-50 p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
 
         </div>
       </div>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-neutral-900 border-l border-neutral-800 z-40 p-6 flex flex-col md:hidden"
+            >
+              <div className="flex flex-col space-y-6 mt-16">
+                <Link 
+                  to="/" 
+                  className="text-2xl font-semibold text-white hover:text-purple-400 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/watchlist" 
+                  className="text-2xl font-semibold text-neutral-300 hover:text-purple-400 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Watchlist
+                </Link>
+                
+                <div className="pt-6 border-t border-neutral-800">
+                  <p className="text-neutral-500 text-sm mb-4">Search</p>
+                  <input
+                    type="text"
+                    placeholder="Search movies..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => { if(query) setShowResults(true) }}
+                    className="w-full bg-neutral-800 text-white px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-neutral-500 border border-neutral-700/50"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

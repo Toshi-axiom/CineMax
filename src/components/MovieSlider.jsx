@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useMovieContext } from "../context/MovieContext";
+import { useNavigate } from "react-router-dom";
 import SkeletonCard from "./SkeletonCard";
 
 function MovieSlider({ title, fetchAction, moviesList }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const sliderRef = useRef(null);
-  const { openModal } = useMovieContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (moviesList) {
@@ -109,10 +109,10 @@ function MovieSlider({ title, fetchAction, moviesList }) {
               <div 
                 key={movie.id} 
                 className="w-[200px] md:w-[240px] flex-none cursor-pointer snap-start"
-                onClick={() => openModal(movie)}
+                onClick={() => navigate(`/movie/${movie.id}`)}
               >
-                <div className="rounded-lg overflow-hidden bg-neutral-800 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20 relative group/card">
-                  <div className="aspect-[2/3] bg-neutral-700 relative">
+                <div className="rounded-2xl overflow-hidden bg-neutral-900 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-500/20 relative group/card border border-neutral-800">
+                  <div className="aspect-[2/3] bg-neutral-800 relative">
                     <img 
                       src={posterUrl} 
                       alt={movie.title} 

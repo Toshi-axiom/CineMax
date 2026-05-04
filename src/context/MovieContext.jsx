@@ -7,8 +7,6 @@ export const useMovieContext = () => {
 };
 
 export const MovieProvider = ({ children }) => {
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [watchlist, setWatchlist] = useState(() => {
     const savedWatchlist = localStorage.getItem('movieAppWatchlist');
     return savedWatchlist ? JSON.parse(savedWatchlist) : [];
@@ -19,18 +17,6 @@ export const MovieProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('movieAppWatchlist', JSON.stringify(watchlist));
   }, [watchlist]);
-
-  const openModal = (movie) => {
-    setSelectedMovie(movie);
-    setIsModalOpen(true);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const closeModal = () => {
-    setSelectedMovie(null);
-    setIsModalOpen(false);
-    document.body.style.overflow = 'unset';
-  };
 
   const toggleWatchlist = (movie) => {
     setWatchlist((prev) => {
@@ -62,10 +48,6 @@ export const MovieProvider = ({ children }) => {
   return (
     <MovieContext.Provider 
       value={{ 
-        selectedMovie, 
-        isModalOpen, 
-        openModal, 
-        closeModal,
         watchlist,
         toggleWatchlist,
         isInWatchlist,

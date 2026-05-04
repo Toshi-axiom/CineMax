@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { tmdbApi } from "../services/tmdbApi";
-import { useMovieContext } from "../context/MovieContext";
 import SkeletonCard from "./SkeletonCard";
 
 const container = {
@@ -26,7 +26,7 @@ function GenreSection() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const { openModal } = useMovieContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -96,10 +96,10 @@ function GenreSection() {
               <button 
                 key={genre.id}
                 onClick={() => setActiveGenre(genre.id)}
-                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
                   activeGenre === genre.id 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' 
-                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40 border border-purple-500/50' 
+                    : 'bg-neutral-800/80 text-neutral-400 hover:bg-neutral-700 hover:text-white border border-neutral-700/50 backdrop-blur-sm'
                 }`}
               >
                 {genre.name}
@@ -129,7 +129,7 @@ function GenreSection() {
                   : `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
 
                 return (
-                  <motion.div variants={item} key={movie.id} className="group cursor-pointer" onClick={() => openModal(movie)}>
+                  <motion.div variants={item} key={movie.id} className="group cursor-pointer" onClick={() => navigate(`/movie/${movie.id}`)}>
                     <div className="relative rounded-lg overflow-hidden bg-neutral-800 shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:shadow-purple-500/20 group-hover:-translate-y-1">
                       <div className="aspect-[2/3]">
                         <img 
