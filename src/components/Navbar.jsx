@@ -71,7 +71,8 @@ function Navbar() {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl shadow-purple-900/10' : 'bg-gradient-to-b from-[#050505]/90 via-[#050505]/40 to-transparent pt-6 pb-16'}`}>
+    <>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl shadow-purple-900/10' : 'bg-gradient-to-b from-[#050505]/90 via-[#050505]/40 to-transparent pt-6 pb-16'}`}>
       <div className="container mx-auto px-4">
 
         <div className="flex justify-between items-center">
@@ -202,6 +203,8 @@ function Navbar() {
         </div>
       </div>
 
+      </header>
+
       {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -262,7 +265,7 @@ function Navbar() {
           </>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
 
