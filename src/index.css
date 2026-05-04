@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
   --animate-shimmer: shimmer 1.5s infinite;
@@ -8,6 +9,8 @@
     }
   };
   
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
 }
 
 @keyframes scrollLeftAnim {
@@ -33,6 +36,11 @@ html {
 }
 
 body {
-  background-color: #000;
-  color: #fff;
+  background-color: #050505;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Outfit', sans-serif;
 }

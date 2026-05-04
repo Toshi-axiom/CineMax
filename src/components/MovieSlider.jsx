@@ -111,15 +111,15 @@ function MovieSlider({ title, fetchAction, moviesList }) {
                 className="w-[200px] md:w-[240px] flex-none cursor-pointer snap-start"
                 onClick={() => navigate(`/movie/${movie.id}`)}
               >
-                <div className="rounded-2xl overflow-hidden bg-neutral-900 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-500/20 relative group/card border border-neutral-800">
-                  <div className="aspect-[2/3] bg-neutral-800 relative">
+                <div className="rounded-2xl overflow-hidden bg-neutral-900 transition-all duration-500 hover:-translate-y-3 hover:scale-[1.03] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.4)] relative group/card border border-neutral-800 hover:border-purple-500/50">
+                  <div className="aspect-[2/3] bg-neutral-800 relative overflow-hidden">
                     <img 
                       src={posterUrl} 
                       alt={movie.title} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
                   </div>
                 </div>
 

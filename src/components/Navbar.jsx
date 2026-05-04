@@ -11,6 +11,15 @@ function Navbar() {
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Debounced search effect
   useEffect(() => {
@@ -62,15 +71,15 @@ function Navbar() {
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 transition-all duration-300 bg-gradient-to-b from-neutral-900/90 to-transparent pt-4 pb-12">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl shadow-purple-900/10' : 'bg-gradient-to-b from-[#050505]/90 via-[#050505]/40 to-transparent pt-6 pb-16'}`}>
       <div className="container mx-auto px-4">
 
         <div className="flex justify-between items-center">
 
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-purple-500 font-black text-3xl tracking-tighter">
+            <Link to="/" className="flex items-center group">
+              <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent font-black text-3xl tracking-tighter drop-shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all group-hover:drop-shadow-[0_0_25px_rgba(168,85,247,0.8)] font-heading">
                 Cine<span className="text-white font-medium tracking-normal">Max</span>
               </span>
             </Link>

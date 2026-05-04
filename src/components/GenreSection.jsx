@@ -191,25 +191,20 @@ function GenreSection() {
 
                 return (
                   <motion.div variants={item} key={movie.id} className="group cursor-pointer" onClick={() => navigate(`/movie/${movie.id}`)}>
-                    <div className="relative rounded-lg overflow-hidden bg-neutral-800 shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:shadow-purple-500/20 group-hover:-translate-y-1">
-                      <div className="aspect-[2/3]">
+                    <div className="relative rounded-2xl overflow-hidden bg-neutral-900 transition-all duration-500 hover:-translate-y-3 hover:scale-[1.03] hover:shadow-[0_20px_40px_-15px_rgba(168,85,247,0.4)] group/card border border-neutral-800 hover:border-purple-500/50">
+                      <div className="aspect-[2/3] overflow-hidden relative">
                         <img 
                           src={posterUrl} 
                           alt={movie.title} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
                           loading="lazy"
                         />
                         
                         {/* Hover popup */}
-                        <div className="absolute inset-0 bg-gradient-to-t
-                                        from-neutral-900 via-neutral-900/60 to-transparent
-                                        opacity-0 group-hover:opacity-100
-                                        transition-all duration-300
-                                        flex flex-col justify-end p-4">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent opacity-0 group-hover/card:opacity-100 transition-all duration-500 flex flex-col justify-end p-4">
                           
-                          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                            <button className="w-full bg-purple-600 hover:bg-purple-500
-                                              text-white py-2 rounded-md text-sm font-medium shadow-lg backdrop-blur-sm">
+                          <div className="transform translate-y-4 group-hover/card:translate-y-0 transition-transform duration-300">
+                            <button className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-md text-sm font-medium shadow-lg backdrop-blur-sm">
                               View Details
                             </button>
                           </div>

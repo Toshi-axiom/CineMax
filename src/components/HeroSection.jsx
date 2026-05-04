@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { tmdbApi } from '../services/tmdbApi';
 import { useMovieContext } from '../context/MovieContext';
 
 function HeroSection() {
-  const [movie, setMovie] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toggleWatchlist, isInWatchlist, openVideoModal } = useMovieContext();
@@ -14,8 +16,7 @@ function HeroSection() {
       try {
         const data = await tmdbApi.getTrendingMovies();
         if (data.results && data.results.length > 0) {
-          const randomMovie = data.results[Math.floor(Math.random() * data.results.length)];
-          setMovie(randomMovie);
+          setMovies(data.results.slice(0, 5)); // Take top 5
         }
       } catch (error) {
         console.error("Error fetching featured movie:", error);
@@ -26,6 +27,16 @@ function HeroSection() {
 
     fetchFeatured();
   }, []);
+
+  useEffect(() => {
+    if (movies.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length);
+    }, 8000); // 8 seconds per slide
+    return () => clearInterval(interval);
+  }, [movies]);
+
+  const movie = movies[currentIndex];
 
   if (loading || !movie) {
     return (
@@ -40,20 +51,35 @@ function HeroSection() {
     : `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
 
   return (
-    <div className="relative w-full h-screen">
-      {/* Background Image & Gradients */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105"
-        style={{ backgroundImage: `url(${backdropUrl})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
-      </div>
+    <div className="relative w-full h-screen overflow-hidden bg-[#050505]">
+      {/* Background Image Carousel */}
+      <AnimatePresence>
+        <motion.div 
+          key={movie.id}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${backdropUrl})` }}
+        />
+      </AnimatePresence>
+
+      {/* Heavy Cinematic Gradients */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent z-0" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-0" />
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] z-0" />
 
       <div className="absolute inset-0 flex items-center z-10 container mx-auto px-4 md:px-8">
         <div className="max-w-4xl pt-32">
-          <div className="transition-all duration-700 animate-fade-in-up">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={movie.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
 
             {/* Badges & Metadata */}
             <div className="flex items-center space-x-4 mb-6">
@@ -141,6 +167,20 @@ function HeroSection() {
               </button>
             </div>
 
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Carousel Indicators */}
+          <div className="absolute bottom-12 left-4 md:left-8 flex gap-2 z-20">
+            {movies.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`h-1.5 rounded-full transition-all duration-500 ${
+                  idx === currentIndex ? "w-8 bg-purple-500" : "w-4 bg-white/30 hover:bg-white/50"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
