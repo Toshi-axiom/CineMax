@@ -21,8 +21,6 @@ function App() {
       
       <div 
         style={{ 
-          height: showPreloader ? '100vh' : 'auto', 
-          overflow: showPreloader ? 'hidden' : 'auto',
           opacity: showPreloader ? 0 : 1,
           transition: 'opacity 0.5s ease-in'
         }}
