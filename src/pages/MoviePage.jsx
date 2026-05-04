@@ -62,8 +62,18 @@ function MoviePage() {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-neutral-950 pb-20"
+      className="min-h-screen bg-neutral-950 pb-20 relative"
     >
+      {/* Close Button */}
+      <button 
+        onClick={() => navigate(-1)}
+        className="absolute top-24 right-4 md:right-8 z-50 p-3 bg-neutral-900/60 hover:bg-neutral-800 text-white rounded-full backdrop-blur-md border border-neutral-700/50 shadow-lg transition-all transform hover:scale-110"
+        title="Go Back"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
       {/* DETAILS CONTENT */}
       <div>
         <div className="relative h-64 md:h-[50vh] w-full bg-neutral-900">
