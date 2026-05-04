@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { tmdbApi } from "../services/tmdbApi";
 import SkeletonCard from "./SkeletonCard";
@@ -20,13 +20,30 @@ const item = {
 };
 
 function GenreSection() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const [genres, setGenres] = useState([]);
-  const [activeGenre, setActiveGenre] = useState(null);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
-  const navigate = useNavigate();
+
+  // Sync state with URL
+  const activeGenre = searchParams.get("genre") || "";
+  const year = searchParams.get("year") || "";
+  const rating = searchParams.get("rating") || "";
+
+  const updateFilters = (key, value) => {
+    setSearchParams(prev => {
+      if (value) {
+        prev.set(key, value);
+      } else {
+        prev.delete(key);
+      }
+      return prev;
+    });
+  };
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -34,8 +51,12 @@ function GenreSection() {
         const data = await tmdbApi.getGenres();
         if (data.genres) {
           setGenres(data.genres);
-          if (data.genres.length > 0) {
-            setActiveGenre(data.genres[0].id);
+          if (data.genres.length > 0 && !searchParams.get("genre")) {
+            // Default to first genre, use replace to not bloat history
+            setSearchParams(prev => {
+              prev.set("genre", data.genres[0].id);
+              return prev;
+            }, { replace: true });
           }
         }
       } catch (error) {
@@ -43,33 +64,43 @@ function GenreSection() {
       }
     };
     fetchGenres();
-  }, []);
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!activeGenre) return;
     
-    const fetchMoviesByGenre = async () => {
+    const fetchMoviesByFilters = async () => {
       setLoading(true);
       setPage(1);
       try {
-        const data = await tmdbApi.getMoviesByGenre(activeGenre, 1);
+        const filters = {
+          with_genres: activeGenre,
+          ...(year && { primary_release_year: year }),
+          ...(rating && { 'vote_average.gte': rating })
+        };
+        const data = await tmdbApi.discoverMovies(filters, 1);
         if (data.results) {
           setMovies(data.results);
         }
       } catch (error) {
-        console.error("Error fetching movies by genre:", error);
+        console.error("Error fetching movies by filters:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchMoviesByGenre();
-  }, [activeGenre]);
+    fetchMoviesByFilters();
+  }, [activeGenre, year, rating]);
 
   const handleLoadMore = async () => {
     setLoadingMore(true);
     const nextPage = page + 1;
     try {
-      const data = await tmdbApi.getMoviesByGenre(activeGenre, nextPage);
+      const filters = {
+        with_genres: activeGenre,
+        ...(year && { primary_release_year: year }),
+        ...(rating && { 'vote_average.gte': rating })
+      };
+      const data = await tmdbApi.discoverMovies(filters, nextPage);
       if (data.results) {
         setMovies(prev => [...prev, ...data.results]);
         setPage(nextPage);
@@ -85,9 +116,39 @@ function GenreSection() {
     <section className="py-16 bg-neutral-900/50">
       <div className="container mx-auto px-6">
 
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
-          Browse by Genre
-        </h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-white">
+            Discover
+          </h2>
+          
+          {/* Advanced Filters */}
+          <div className="flex flex-wrap gap-3">
+            <select 
+              value={year}
+              onChange={(e) => updateFilters("year", e.target.value)}
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-neutral-700/50 focus:ring-2 focus:ring-purple-500/50 focus:outline-none cursor-pointer text-sm font-medium"
+            >
+              <option value="">All Years</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+            </select>
+
+            <select 
+              value={rating}
+              onChange={(e) => updateFilters("rating", e.target.value)}
+              className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-neutral-700/50 focus:ring-2 focus:ring-purple-500/50 focus:outline-none cursor-pointer text-sm font-medium"
+            >
+              <option value="">Any Rating</option>
+              <option value="8">8+ Stars</option>
+              <option value="7">7+ Stars</option>
+              <option value="6">6+ Stars</option>
+            </select>
+          </div>
+        </div>
 
         {/* Genre buttons */}
         <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -95,9 +156,9 @@ function GenreSection() {
             {genres.map(genre => (
               <button 
                 key={genre.id}
-                onClick={() => setActiveGenre(genre.id)}
+                onClick={() => updateFilters("genre", genre.id.toString())}
                 className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  activeGenre === genre.id 
+                  activeGenre === genre.id.toString() 
                     ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40 border border-purple-500/50' 
                     : 'bg-neutral-800/80 text-neutral-400 hover:bg-neutral-700 hover:text-white border border-neutral-700/50 backdrop-blur-sm'
                 }`}

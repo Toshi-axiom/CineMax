@@ -47,16 +47,16 @@ export const tmdbApi = {
     return fetchFromApi('/movie/top_rated');
   },
 
-  searchMovies: async (query) => {
+  searchMovies: async (query, page = 1) => {
     if (!query) return { results: [] };
-    return fetchFromApi('/search/movie', { query });
+    return fetchFromApi('/search/movie', { query, page });
   },
 
   getGenres: async () => {
     return fetchFromApi('/genre/movie/list');
   },
 
-  getMoviesByGenre: async (genreId, page = 1) => {
-    return fetchFromApi('/discover/movie', { with_genres: genreId, page });
+  discoverMovies: async (filters = {}, page = 1) => {
+    return fetchFromApi('/discover/movie', { ...filters, page });
   },
 };

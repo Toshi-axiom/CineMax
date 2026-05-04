@@ -7,6 +7,7 @@ import Preloader from "./components/Preloader";
 import HomePage from "./pages/HomePage";
 import MoviePage from "./pages/MoviePage";
 import WatchlistPage from "./pages/WatchlistPage";
+import SearchPage from "./pages/SearchPage";
 
 function App() {
   const [showPreloader, setShowPreloader] = React.useState(true);
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/movie/:id" element={<MoviePage />} />
           <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
 
         <VideoModal />

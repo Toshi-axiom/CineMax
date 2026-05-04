@@ -90,6 +90,12 @@ function Navbar() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => { if(query) setShowResults(true) }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && query.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                  setShowResults(false);
+                }
+              }}
               className="bg-neutral-800/80 text-white px-4 py-2 rounded-full text-sm w-48 focus:w-64 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-neutral-500 border border-neutral-700/50"
             />
 
@@ -232,6 +238,13 @@ function Navbar() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => { if(query) setShowResults(true) }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && query.trim()) {
+                        navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+                        setShowResults(false);
+                        setIsMobileMenuOpen(false);
+                      }
+                    }}
                     className="w-full bg-neutral-800 text-white px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-neutral-500 border border-neutral-700/50"
                   />
                 </div>
