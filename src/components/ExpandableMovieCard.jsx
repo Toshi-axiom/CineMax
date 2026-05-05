@@ -6,6 +6,7 @@ import { useMovieContext } from '../context/MovieContext';
 const ExpandableMovieCard = ({ movie }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0, height: 0 });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const cardRef = useRef(null);
   const hoverTimeoutRef = useRef(null);
   const navigate = useNavigate();
@@ -19,7 +20,15 @@ const ExpandableMovieCard = ({ movie }) => {
     ? movie.backdrop_path
     : `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`;
 
+  useEffect(() => {
+    // Check if device supports hover
+    const hasTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    setIsTouchDevice(hasTouch);
+  }, []);
+
   const handleMouseEnter = () => {
+    if (isTouchDevice) return; // Disable hover effect entirely on mobile
+
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     
     hoverTimeoutRef.current = setTimeout(() => {
@@ -37,6 +46,8 @@ const ExpandableMovieCard = ({ movie }) => {
   };
 
   const handleMouseLeave = () => {
+    if (isTouchDevice) return;
+
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     setIsExpanded(false);
   };
@@ -100,7 +111,7 @@ const ExpandableMovieCard = ({ movie }) => {
 
       {/* Expanded Overlay Card */}
       <AnimatePresence>
-        {isExpanded && (
+        {isExpanded && !isTouchDevice && (
           <motion.div
             initial={{ 
               opacity: 0, 
@@ -145,7 +156,7 @@ const ExpandableMovieCard = ({ movie }) => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent opacity-80" />
               <div className="absolute bottom-4 left-4 right-4">
-                <h3 className="text-white font-bold text-lg drop-shadow-md truncate">
+                <h3 className="text-white font-bold text-lg drop-shadow-md truncate font-heading uppercase tracking-wide">
                   {movie.title || movie.original_title}
                 </h3>
               </div>
