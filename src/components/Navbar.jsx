@@ -15,7 +15,7 @@ function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 10); // Netflix triggers fairly early
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -74,9 +74,9 @@ function Navbar() {
     <>
       <header 
         style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}
-        className={`transition-all duration-500 ${scrolled ? 'bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl shadow-purple-900/10' : 'bg-gradient-to-b from-[#050505]/90 via-[#050505]/40 to-transparent pt-6 pb-16'}`}
+        className={`transition-colors duration-500 ease-in-out ${scrolled ? 'bg-[#050505] py-4 shadow-xl' : 'bg-gradient-to-b from-black/90 via-black/40 to-transparent pt-6 pb-16'}`}
       >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 md:px-8">
 
         <div className="flex justify-between items-center">
 
@@ -91,8 +91,8 @@ function Navbar() {
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-white hover:text-purple-400 transition-colors font-medium">Home</Link>
-            <Link to="/watchlist" className="text-neutral-300 hover:text-purple-400 transition-colors font-medium">Watchlist</Link>
+            <Link to="/" className="text-white hover:text-neutral-300 transition-colors font-medium">Home</Link>
+            <Link to="/watchlist" className="text-neutral-300 hover:text-white transition-colors font-medium">Watchlist</Link>
           </nav>
 
           {/* Search */}
@@ -109,14 +109,14 @@ function Navbar() {
                   setShowResults(false);
                 }
               }}
-              className="bg-neutral-800/80 text-white px-4 py-2 rounded-full text-sm w-48 focus:w-64 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-neutral-500 border border-neutral-700/50"
+              className="bg-black/50 text-white px-4 py-2 rounded-full text-sm w-48 focus:w-64 transition-all duration-300 focus:outline-none focus:ring-1 focus:ring-white/50 placeholder-neutral-400 border border-white/20 backdrop-blur-sm"
             />
 
             {/* Spinner */}
             {isSearching && (
               <div className="absolute right-3 top-2.5">
                 <svg
-                  className="w-4 h-4 text-purple-500 animate-spin"
+                  className="w-4 h-4 text-white animate-spin"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -140,15 +140,15 @@ function Navbar() {
 
             {/* Search Results */}
             {showResults && results.length > 0 && (
-              <div className="absolute mt-2 w-72 bg-neutral-800 rounded-lg shadow-2xl overflow-hidden z-50 border border-neutral-700">
-                <ul className="divide-y divide-neutral-700/50">
+              <div className="absolute mt-2 w-72 bg-[#181818] rounded-lg shadow-2xl overflow-hidden z-50 border border-neutral-800">
+                <ul className="divide-y divide-neutral-800/50">
                   {results.map((movie) => {
                     const posterUrl = movie.poster_path?.startsWith('http')
                       ? movie.poster_path
                       : `https://image.tmdb.org/t/p/w92${movie.poster_path}`;
 
                     return (
-                      <li key={movie.id} className="hover:bg-neutral-700 transition-colors">
+                      <li key={movie.id} className="hover:bg-neutral-800 transition-colors">
                         <button 
                           onClick={() => handleResultClick(movie)}
                           className="flex items-center p-3 w-full text-left"
@@ -165,7 +165,7 @@ function Navbar() {
                           <div className="ml-3 flex-1 overflow-hidden">
                             <p className="text-sm font-medium text-white truncate">{movie.title || movie.original_title}</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-xs text-yellow-500 font-medium">★ {movie.vote_average?.toFixed(1)}</span>
+                              <span className="text-xs text-green-500 font-medium">★ {movie.vote_average?.toFixed(1)}</span>
                               <span className="text-xs text-neutral-400">{movie.release_date?.substring(0, 4)}</span>
                             </div>
                           </div>
@@ -179,7 +179,7 @@ function Navbar() {
 
             {/* No Results */}
             {showResults && !isSearching && query && results.length === 0 && (
-              <div className="absolute mt-2 w-72 bg-neutral-800 rounded-lg shadow-2xl overflow-hidden z-50 border border-neutral-700">
+              <div className="absolute mt-2 w-72 bg-[#181818] rounded-lg shadow-2xl overflow-hidden z-50 border border-neutral-800">
                 <div className="p-4 text-center text-neutral-400 text-sm">
                   No movies found matching "{query}"
                 </div>
@@ -227,19 +227,19 @@ function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-neutral-900 border-l border-neutral-800 z-40 p-6 flex flex-col md:hidden"
+              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-[#050505] border-l border-neutral-800 z-40 p-6 flex flex-col md:hidden"
             >
               <div className="flex flex-col space-y-6 mt-16">
                 <Link 
                   to="/" 
-                  className="text-2xl font-semibold text-white hover:text-purple-400 transition-colors"
+                  className="text-2xl font-semibold text-white hover:text-neutral-300 transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
                 </Link>
                 <Link 
                   to="/watchlist" 
-                  className="text-2xl font-semibold text-neutral-300 hover:text-purple-400 transition-colors"
+                  className="text-2xl font-semibold text-neutral-300 hover:text-white transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Watchlist
@@ -260,7 +260,7 @@ function Navbar() {
                         setIsMobileMenuOpen(false);
                       }
                     }}
-                    className="w-full bg-neutral-800 text-white px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-purple-500/50 placeholder-neutral-500 border border-neutral-700/50"
+                    className="w-full bg-[#181818] text-white px-4 py-3 rounded-lg text-base focus:outline-none focus:ring-1 focus:ring-white/50 placeholder-neutral-500 border border-neutral-800"
                   />
                 </div>
               </div>

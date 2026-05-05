@@ -16,7 +16,20 @@ function HeroSection() {
       try {
         const data = await tmdbApi.getTrendingMovies();
         if (data.results && data.results.length > 0) {
-          setMovies(data.results.slice(0, 5)); // Take top 5
+          const top5 = data.results.slice(0, 5);
+          const moviesWithDetails = await Promise.all(
+            top5.map(async (m) => {
+              try {
+                const details = await tmdbApi.getMovieDetails(m.id);
+                // We use trailer_key for the background video iframe
+                const trailerKey = details.videos?.results?.find(vid => vid.type === 'Trailer' && vid.site === 'YouTube')?.key;
+                return { ...m, trailer_url: details.trailer_url, trailer_key: trailerKey };
+              } catch (e) {
+                return m;
+              }
+            })
+          );
+          setMovies(moviesWithDetails);
         }
       } catch (error) {
         console.error("Error fetching featured movie:", error);
@@ -32,7 +45,7 @@ function HeroSection() {
     if (movies.length === 0) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length);
-    }, 8000); // 8 seconds per slide
+    }, 12000); // Increased to 12s to allow video to play longer
     return () => clearInterval(interval);
   }, [movies]);
 
@@ -46,38 +59,61 @@ function HeroSection() {
     );
   }
 
-  const backdropUrl = movie.backdrop_path.startsWith('http') 
+  const backdropUrl = movie.backdrop_path?.startsWith('http') 
     ? movie.backdrop_path 
     : `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#050505]">
-      {/* Background Image Carousel */}
-      <AnimatePresence>
-        <motion.div 
-          key={movie.id}
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${backdropUrl})` }}
-        />
+      {/* Background Media */}
+      <AnimatePresence mode="wait">
+        {movie.trailer_key ? (
+          <motion.div 
+            key={`video-${movie.id}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+            className="absolute inset-0 w-full h-full pointer-events-none"
+          >
+            {/* The iframe is scaled up and shifted to hide youtube controls/branding */}
+            <div className="absolute inset-0 w-full h-[140%] -top-[20%]">
+              <iframe
+                src={`https://www.youtube.com/embed/${movie.trailer_key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${movie.trailer_key}&playsinline=1`}
+                title="Trailer"
+                className="w-full h-full object-cover opacity-80"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              ></iframe>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key={`img-${movie.id}`}
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2, ease: "easeOut" }} // Ken burns effect
+            className="absolute inset-0 bg-cover bg-center opacity-80"
+            style={{ backgroundImage: `url(${backdropUrl})` }}
+          />
+        )}
       </AnimatePresence>
 
       {/* Heavy Cinematic Gradients */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/80 to-transparent z-0" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/60 to-transparent z-0" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-0" />
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] z-0" />
+      {/* Netflix style bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent z-0" />
 
       <div className="absolute inset-0 flex items-center z-10 container mx-auto px-4 md:px-8">
         <div className="max-w-4xl pt-32">
           <AnimatePresence mode="wait">
             <motion.div 
               key={movie.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
 
@@ -99,22 +135,22 @@ function HeroSection() {
                 <span className="text-sm font-semibold text-white">{movie.vote_average?.toFixed(1)}</span>
               </div>
 
-              <span className="text-neutral-400 text-sm font-medium">{movie.release_date?.substring(0, 4)}</span>
+              <span className="text-neutral-300 text-sm font-medium drop-shadow-md">{movie.release_date?.substring(0, 4)}</span>
               
               {movie.original_language && (
-                <span className="text-neutral-400 text-sm font-medium uppercase border border-neutral-600 px-2 rounded">
+                <span className="text-neutral-300 text-sm font-medium uppercase border border-neutral-600 px-2 rounded drop-shadow-md bg-black/30 backdrop-blur-sm">
                   {movie.original_language}
                 </span>
               )}
             </div>
 
             {/* Title */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 drop-shadow-2xl leading-tight tracking-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] leading-tight tracking-tight">
               {movie.title || movie.original_title}
             </h1>
 
             {/* Overview */}
-            <p className="text-neutral-300 text-lg md:text-xl mb-10 line-clamp-3 max-w-2xl drop-shadow-md leading-relaxed font-light">
+            <p className="text-neutral-200 text-lg md:text-xl mb-10 line-clamp-3 max-w-2xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] leading-relaxed font-medium">
               {movie.overview}
             </p>
 
@@ -126,7 +162,7 @@ function HeroSection() {
                     openVideoModal(movie.trailer_url);
                   }
                 }}
-                className="bg-white hover:bg-neutral-200 text-black px-8 py-4 rounded-full font-semibold flex items-center gap-2 transition-all transform hover:scale-105"
+                className="bg-white hover:bg-neutral-200 text-black px-8 py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -145,14 +181,17 @@ function HeroSection() {
 
               <button 
                 onClick={() => navigate(`/movie/${movie.id}`)}
-                className="bg-neutral-500/20 hover:bg-neutral-500/30 text-white px-8 py-4 rounded-full font-semibold flex items-center gap-2 transition-all border border-white/20 backdrop-blur-md transform hover:scale-105"
+                className="bg-neutral-600/40 hover:bg-neutral-600/60 text-white px-8 py-4 rounded-full font-bold flex items-center gap-2 transition-all border border-white/10 backdrop-blur-md transform hover:scale-105"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 More Info
               </button>
 
               <button 
                 onClick={() => toggleWatchlist(movie)}
-                className="p-4 rounded-full bg-neutral-500/20 hover:bg-neutral-500/30 text-white transition-all border border-white/20 backdrop-blur-md transform hover:scale-105 flex items-center justify-center"
+                className="p-4 rounded-full bg-neutral-600/40 hover:bg-neutral-600/60 text-white transition-all border border-white/10 backdrop-blur-md transform hover:scale-105 flex items-center justify-center"
                 title={isInWatchlist(movie.id) ? "Remove from Watchlist" : "Add to Watchlist"}
               >
                 {isInWatchlist(movie.id) ? (
@@ -177,7 +216,7 @@ function HeroSection() {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`h-1.5 rounded-full transition-all duration-500 ${
-                  idx === currentIndex ? "w-8 bg-purple-500" : "w-4 bg-white/30 hover:bg-white/50"
+                  idx === currentIndex ? "w-8 bg-white" : "w-4 bg-white/30 hover:bg-white/50"
                 }`}
               />
             ))}
