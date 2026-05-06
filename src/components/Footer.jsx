@@ -30,10 +30,14 @@ const Footer = () => {
                 <Link to="/watchlist" className="text-neutral-400 hover:text-white transition-colors text-sm">Watchlist</Link>
               </li>
               <li>
-                <button className="text-neutral-400 hover:text-white transition-colors text-sm">Top Rated</button>
+                <a href="/#top-rated" className="text-neutral-400 hover:text-white transition-colors text-sm">
+                  Top Rated
+                </a>
               </li>
               <li>
-                <button className="text-neutral-400 hover:text-white transition-colors text-sm">Trending Now</button>
+                <a href="/#trending" className="text-neutral-400 hover:text-white transition-colors text-sm">
+                  Trending Now
+                </a>
               </li>
             </ul>
           </div>
@@ -43,10 +47,10 @@ const Footer = () => {
             <h4 className="text-white font-bold mb-4 uppercase tracking-wider text-sm font-heading">Legal</h4>
             <ul className="space-y-2 mb-6">
               <li>
-                <button className="text-neutral-400 hover:text-white transition-colors text-sm">Privacy Policy</button>
+                <a href="#" className="text-neutral-400 hover:text-white transition-colors text-sm">Privacy Policy</a>
               </li>
               <li>
-                <button className="text-neutral-400 hover:text-white transition-colors text-sm">Terms of Service</button>
+                <a href="#" className="text-neutral-400 hover:text-white transition-colors text-sm">Terms of Service</a>
               </li>
             </ul>
             

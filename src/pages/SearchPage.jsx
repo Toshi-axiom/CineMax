@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { tmdbApi } from "../services/tmdbApi";
 import SkeletonCard from "../components/SkeletonCard";
+import { InlineEmpty, InlineError } from "../components/SectionState";
 
 const container = {
   hidden: { opacity: 0 },
@@ -29,6 +30,7 @@ function SearchPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!query) {
@@ -39,6 +41,7 @@ function SearchPage() {
 
     const fetchSearchResults = async () => {
       setLoading(true);
+      setError("");
       setPage(1);
       try {
         const data = await tmdbApi.searchMovies(query, 1);
@@ -48,6 +51,7 @@ function SearchPage() {
         }
       } catch (error) {
         console.error("Error fetching search results:", error);
+        setError(error.message || "Unable to fetch search results.");
       } finally {
         setLoading(false);
       }
@@ -69,6 +73,7 @@ function SearchPage() {
       }
     } catch (error) {
       console.error("Error loading more search results:", error);
+      setError(error.message || "Unable to load more search results.");
     } finally {
       setLoadingMore(false);
     }
@@ -79,7 +84,13 @@ function SearchPage() {
       <div className="container mx-auto px-6">
         
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">
-          Search Results for <span className="text-purple-500">"{query}"</span>
+          {query ? (
+            <>
+              Search Results for <span className="text-purple-500">"{query}"</span>
+            </>
+          ) : (
+            <>Search Movies</>
+          )}
         </h1>
 
         {loading ? (
@@ -88,6 +99,13 @@ function SearchPage() {
               <SkeletonCard key={n} />
             ))}
           </div>
+        ) : error ? (
+          <InlineError message={error} onRetry={() => navigate(0)} />
+        ) : !query ? (
+          <InlineEmpty
+            title="Start with a search term"
+            description="Use the search bar to find movies by title."
+          />
         ) : movies.length === 0 ? (
           <div className="text-center py-20">
             <h2 className="text-2xl font-semibold text-neutral-400 mb-4">No movies found matching "{query}"</h2>

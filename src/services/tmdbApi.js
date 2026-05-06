@@ -2,6 +2,10 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const fetchFromApi = async (endpoint, params = {}) => {
+  if (!API_KEY) {
+    throw new Error('TMDB API key is missing. Add VITE_TMDB_API_KEY in your .env file.');
+  }
+
   const queryParams = new URLSearchParams({
     api_key: API_KEY,
     ...params,
@@ -10,7 +14,13 @@ const fetchFromApi = async (endpoint, params = {}) => {
   try {
     const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`);
     if (!response.ok) {
-      throw new Error(`TMDB API error: ${response.statusText}`);
+      if (response.status === 401) {
+        throw new Error('Invalid TMDB API key. Check VITE_TMDB_API_KEY and try again.');
+      }
+      if (response.status === 429) {
+        throw new Error('TMDB rate limit reached. Please wait and try again.');
+      }
+      throw new Error(`TMDB API error (${response.status}): ${response.statusText}`);
     }
     return await response.json();
   } catch (error) {

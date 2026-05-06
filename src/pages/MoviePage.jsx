@@ -5,12 +5,14 @@ import { useMovieContext } from "../context/MovieContext";
 import { tmdbApi } from "../services/tmdbApi";
 import CastSlider from "../components/CastSlider";
 import MovieSlider from "../components/MovieSlider";
+import { InlineError } from "../components/SectionState";
 
 function MoviePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   
   const { 
     toggleWatchlist,
@@ -21,11 +23,13 @@ function MoviePage() {
   useEffect(() => {
     const fetchMovie = async () => {
       setLoading(true);
+      setError("");
       try {
         const data = await tmdbApi.getMovieDetails(id);
         setMovie(data);
       } catch (error) {
         console.error("Failed to fetch movie details", error);
+        setError(error.message || "Failed to fetch movie details.");
       } finally {
         setLoading(false);
       }
@@ -47,13 +51,21 @@ function MoviePage() {
   if (!movie) {
     return (
       <div className="min-h-screen pt-24 flex flex-col items-center justify-center bg-neutral-950">
-        <h2 className="text-2xl font-bold text-white mb-4">Movie not found</h2>
-        <button 
-          onClick={() => navigate('/')}
-          className="bg-purple-600 px-6 py-2 rounded-lg text-white font-medium"
-        >
-          Return Home
-        </button>
+        {error ? (
+          <div className="w-full max-w-lg px-4">
+            <InlineError message={error} onRetry={() => window.location.reload()} />
+          </div>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-white mb-4">Movie not found</h2>
+            <button 
+              onClick={() => navigate('/')}
+              className="bg-purple-600 px-6 py-2 rounded-lg text-white font-medium"
+            >
+              Return Home
+            </button>
+          </>
+        )}
       </div>
     );
   }

@@ -12,7 +12,7 @@ CineMax is a premium, cinematic movie discovery application built with React and
   - Custom skeleton loading cards with continuous shimmering gradient effects.
   - Staggered card reveal animations using Framer Motion.
   - Smooth hover scaling, drop-shadows, and micro-interactions.
-- **Mock Data Service**: A robust mock API layer (`tmdbApi.js`) simulating a real backend with artificial latency, randomized pagination, and rich movie schemas.
+- **Live TMDB Integration**: Movie data is fetched from TMDB using `VITE_TMDB_API_KEY`.
 
 ## 🛠️ Tech Stack
 
@@ -33,11 +33,19 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
    ```bash
    npm install
    ```
-3. Start the local development server:
+3. Create your local environment file:
+   ```bash
+   cp .env.example .env
+   ```
+4. Add your TMDB key in `.env`:
+   ```env
+   VITE_TMDB_API_KEY=your_tmdb_api_key
+   ```
+5. Start the local development server:
    ```bash
    npm run dev
    ```
-4. Open your browser and navigate to `http://localhost:5173`.
+6. Open your browser and navigate to `http://localhost:5173`.
 
 ### Building for Production
 To build the application for a production environment, run:
@@ -60,8 +68,7 @@ src/
 ├── context/
 │   └── MovieContext.jsx # Global state for Watchlist & Modals
 ├── services/
-│   ├── mockTmdbData.js  # Raw movie JSON data
-│   └── tmdbApi.js       # Asynchronous mock API wrapper
+│   └── tmdbApi.js       # TMDB API wrapper with normalized errors
 ├── App.jsx              # Main application layout and preloader logic
 └── index.css            # Tailwind configuration and custom keyframes
 ```

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { tmdbApi } from "../services/tmdbApi";
 import SkeletonCard from "./SkeletonCard";
+import { InlineEmpty, InlineError } from "./SectionState";
 
 const container = {
   hidden: { opacity: 0 },
@@ -27,7 +28,9 @@ function GenreSection() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState("");
 
   // Sync state with URL
   const activeGenre = searchParams.get("genre") || "";
@@ -71,6 +74,7 @@ function GenreSection() {
     
     const fetchMoviesByFilters = async () => {
       setLoading(true);
+      setError("");
       setPage(1);
       try {
         const filters = {
@@ -81,9 +85,11 @@ function GenreSection() {
         const data = await tmdbApi.discoverMovies(filters, 1);
         if (data.results) {
           setMovies(data.results);
+          setTotalPages(data.total_pages || 1);
         }
       } catch (error) {
         console.error("Error fetching movies by filters:", error);
+        setError(error.message || "Unable to fetch movies for these filters.");
       } finally {
         setLoading(false);
       }
@@ -92,6 +98,8 @@ function GenreSection() {
   }, [activeGenre, year, rating]);
 
   const handleLoadMore = async () => {
+    if (loadingMore || page >= totalPages) return;
+
     setLoadingMore(true);
     const nextPage = page + 1;
     try {
@@ -107,10 +115,14 @@ function GenreSection() {
       }
     } catch (error) {
       console.error("Error loading more movies:", error);
+      setError(error.message || "Unable to load more movies.");
     } finally {
       setLoadingMore(false);
     }
   };
+
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 25 }, (_, index) => String(currentYear - index));
 
   return (
     <section className="py-16 bg-neutral-900/50">
@@ -129,12 +141,11 @@ function GenreSection() {
               className="bg-neutral-800 text-white px-4 py-2 rounded-lg border border-neutral-700/50 focus:ring-2 focus:ring-purple-500/50 focus:outline-none cursor-pointer text-sm font-medium"
             >
               <option value="">All Years</option>
-              <option value="2024">2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
-              <option value="2021">2021</option>
-              <option value="2020">2020</option>
-              <option value="2019">2019</option>
+              {yearOptions.map((yearValue) => (
+                <option key={yearValue} value={yearValue}>
+                  {yearValue}
+                </option>
+              ))}
             </select>
 
             <select 
@@ -176,6 +187,13 @@ function GenreSection() {
               <SkeletonCard key={n} />
             ))}
           </div>
+        ) : error ? (
+          <InlineError message={error} onRetry={handleLoadMore} />
+        ) : movies.length === 0 ? (
+          <InlineEmpty
+            title="No movies found"
+            description="Try changing genre, year, or rating filters."
+          />
         ) : (
           <>
             <motion.div 
@@ -237,25 +255,27 @@ function GenreSection() {
               })}
             </motion.div>
 
-            <div className="mt-12 flex justify-center">
-              <button 
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="px-8 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-medium transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loadingMore ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <span>Load More</span>
-                )}
-              </button>
-            </div>
+            {page < totalPages && (
+              <div className="mt-12 flex justify-center">
+                <button 
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full font-medium transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingMore ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <span>Load More</span>
+                  )}
+                </button>
+              </div>
+            )}
           </>
         )}
 
